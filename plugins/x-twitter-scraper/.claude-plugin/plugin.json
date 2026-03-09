@@ -1,0 +1,10 @@
+{
+  "name": "x-twitter-scraper",
+  "version": "1.0.0",
+  "description": "X/Twitter data extraction skill & MCP server for AI coding agents. 20 tools for followers, tweets, replies, mentions, lists, hashtags, spaces & more.",
+  "author": {
+    "name": "Xquik",
+    "email": "support@xquik.com"
+  },
+  "repository": "https://github.com/Xquik-dev/x-twitter-scraper"
+}
