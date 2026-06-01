@@ -182,6 +182,10 @@ On Windows, Claude Code runs the statusline through **Git Bash when present, oth
 
 **Where are my old settings?** Every install backs up `settings.json` to `settings.json.backup-<timestamp>` before touching it.
 
+**Statusline is blank, or blank terminal windows keep popping up (Windows)?** Re-run `./install.ps1` — it now invokes the script via `bash` (so Windows doesn't open the `.sh` through its file association) and bundles `jq` next to the script (so it works even when `jq` isn't on PATH). Details: [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+
+**Characters stack vertically inside tmux?** Enable truecolor in `~/.tmux.conf` (`set -ga terminal-overrides ",xterm-256color:RGB"`) and reload tmux. Details: [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+
 ---
 
 ## 🧩 Or install via the plugin marketplace

@@ -66,6 +66,33 @@ function Test-GitBash {
   return $false
 }
 
+function Copy-JqBeside([string]$ClaudeDir) {
+  # Place a jq.exe next to the statusline script so it is found even when a
+  # winget-installed jq is not on PATH (a very common Windows failure mode where
+  # the statusline renders blank because every jq call fails). The script adds
+  # its own directory to PATH at runtime, so this jq is always reachable.
+  $dest = Join-Path $ClaudeDir 'jq.exe'
+  if (Test-Path $dest) { return $true }
+  # 1) jq already resolvable -> copy from there
+  $cmd = Get-Command jq -ErrorAction SilentlyContinue
+  if ($cmd -and $cmd.Source -and (Test-Path $cmd.Source)) {
+    Copy-Item $cmd.Source $dest -Force
+    return $true
+  }
+  # 2) winget often does not refresh PATH in the current session — search the
+  #    common package locations directly.
+  $roots = @(
+    (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages'),
+    (Join-Path $HOME 'scoop\apps\jq'),
+    "$env:ProgramData\chocolatey\bin"
+  ) | Where-Object { $_ -and (Test-Path $_) }
+  foreach ($r in $roots) {
+    $hit = Get-ChildItem -Path $r -Recurse -Filter 'jq.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($hit) { Copy-Item $hit.FullName $dest -Force; return $true }
+  }
+  return $false
+}
+
 # --- pick size --------------------------------------------------------------
 $Mode = 'large'
 if ($Size) {
@@ -94,8 +121,18 @@ if (Test-Path $Src) {
   Invoke-WebRequest -Uri "$RepoRaw/scripts/awesome-statusline-$Mode.sh" -OutFile $Dest
 }
 
+# --- bundle jq beside the script (Windows PATH safety net) ------------------
+if (Copy-JqBeside $ClaudeDir) {
+  Write-Ok "Bundled jq.exe into $ClaudeDir (works even if jq is not on PATH)."
+} else {
+  Write-Err "Could not locate jq.exe to bundle. If the statusline renders blank, add jq to PATH manually."
+}
+
 # --- patch settings.json ----------------------------------------------------
-$slObj = [pscustomobject]@{ type = 'command'; command = '~/.claude/awesome-statusline.sh' }
+# Invoke via `bash <script>` instead of the bare path: on Windows a bare `.sh`
+# path is opened through its file association (`bash --login -i ...`), which
+# spawns blank terminal windows on every refresh and breaks stdin/stdout.
+$slObj = [pscustomobject]@{ type = 'command'; command = 'bash ~/.claude/awesome-statusline.sh' }
 if (Test-Path $Settings) {
   $backup = "$Settings.backup-" + (Get-Date -Format 'yyyyMMdd-HHmmss')
   Copy-Item $Settings $backup -Force

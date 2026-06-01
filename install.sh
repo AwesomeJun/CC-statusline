@@ -101,7 +101,11 @@ else
 fi
 chmod +x "$DEST"
 
-STATUSLINE_JSON='{"type":"command","command":"~/.claude/awesome-statusline.sh"}'
+# Invoke via `bash <script>` (not the bare path) so the statusline runs
+# identically on every platform. On Windows a bare `.sh` path is opened through
+# its file association (`bash --login -i ...`), which spawns visible terminal
+# windows and breaks stdin/stdout — calling bash explicitly avoids that.
+STATUSLINE_JSON='{"type":"command","command":"bash ~/.claude/awesome-statusline.sh"}'
 if [ -f "$SETTINGS" ]; then
   BACKUP="$SETTINGS.backup-$(date +%Y%m%d-%H%M%S)"
   cp "$SETTINGS" "$BACKUP"

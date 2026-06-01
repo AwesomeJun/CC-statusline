@@ -10,6 +10,11 @@
 # % numbers use gradient end color + Bold
 # ============================================================================
 
+# Ensure a bundled jq (copied next to this script by the installer) is found,
+# even when Claude Code launches the statusline with a minimal PATH — common on
+# Windows / GUI launches where a winget-installed jq is not on PATH yet.
+export PATH="$(dirname "$0"):$PATH"
+
 input=$(cat)
 
 # Parse JSON input
