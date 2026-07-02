@@ -215,6 +215,12 @@ function Format-ResetDate($Value) {
 $Model = [string](Get-JsonValue $Data @('model', 'display_name') 'Unknown')
 $CurrentDir = [string](Get-JsonValue $Data @('workspace', 'current_dir') '.')
 $ContextSize = As-Number (Get-JsonValue $Data @('context_window', 'context_window_size') 200000) 200000
+
+# fable ships 1m context like opus/sonnet[1m], but the harness reports 200k for it
+if ($Model -match 'fable') {
+  $ContextSize = 1000000
+}
+
 $CurrentUsage = Get-JsonValue $Data @('context_window', 'current_usage') $null
 $OutputStyle = [string](Get-JsonValue $Data @('output_style', 'name') '')
 $TotalCost = As-Number (Get-JsonValue $Data @('cost', 'total_cost_usd') 0) 0

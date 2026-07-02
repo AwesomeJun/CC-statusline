@@ -21,6 +21,11 @@ input=$(cat)
 MODEL=$(echo "$input" | jq -r '.model.display_name // "Unknown"')
 CURRENT_DIR=$(echo "$input" | jq -r '.workspace.current_dir // "."')
 CONTEXT_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size // 200000')
+
+# fable ships 1m context like opus/sonnet[1m], but the harness reports 200k for it
+if echo "$MODEL" | grep -qi "fable"; then
+    CONTEXT_SIZE=1000000
+fi
 CURRENT_USAGE=$(echo "$input" | jq -r '.context_window.current_usage // null')
 OUTPUT_STYLE=$(echo "$input" | jq -r '.output_style.name // ""')
 TOTAL_COST=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
