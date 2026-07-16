@@ -216,7 +216,6 @@ Built with 🩵 for the Claude Code community · [Catppuccin](https://catppuccin
 ⭐ **Star it if it made your terminal nicer.**
 
 </div>
-## Star History
 
 <a href="https://www.star-history.com/?repos=AwesomeJun%2FCC-statusline&type=date&legend=top-left">
  <picture>
