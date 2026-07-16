@@ -215,7 +215,7 @@ Built with 🩵 for the Claude Code community · [Catppuccin](https://catppuccin
 
 ⭐ **Star it if it made your terminal nicer.**
 
-</div>
+
 
 <a href="https://www.star-history.com/?repos=AwesomeJun%2FCC-statusline&type=date&legend=top-left">
  <picture>
@@ -224,3 +224,5 @@ Built with 🩵 for the Claude Code community · [Catppuccin](https://catppuccin
    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=AwesomeJun/CC-statusline&type=date&legend=top-left&sealed_token=ntTNhwQ951y6lOVznUbvdeYGCi23yOBbRnadWt5pMTIRfdp6L3KPB1Dwy65vNWI7CIY4R1MzU6yloqyfkwmlEbMoguscV-kFRG5PCqCVyP4_G4XgShBDtg" />
  </picture>
 </a>
+
+</div>
