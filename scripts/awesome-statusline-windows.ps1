@@ -215,6 +215,12 @@ function Format-ResetDate($Value) {
 $Model = [string](Get-JsonValue $Data @('model', 'display_name') 'Unknown')
 $CurrentDir = [string](Get-JsonValue $Data @('workspace', 'current_dir') '.')
 $ContextSize = As-Number (Get-JsonValue $Data @('context_window', 'context_window_size') 200000) 200000
+
+# fable and opus 4.8 ship 1m context, but the harness can report 200k for them
+if ($Model -match 'fable|opus 4\.8|opus-4-8|claude-opus-4-8') {
+  $ContextSize = 1000000
+}
+
 $CurrentUsage = Get-JsonValue $Data @('context_window', 'current_usage') $null
 $OutputStyle = [string](Get-JsonValue $Data @('output_style', 'name') '')
 $TotalCost = As-Number (Get-JsonValue $Data @('cost', 'total_cost_usd') 0) 0
@@ -236,6 +242,14 @@ if ($null -ne $CurrentUsage) {
     $CurrentTokens = As-Number $CurrentUsage
   }
 }
+
+# harness sometimes reports a stale 200k window even when the model is
+# actually running the 1m context beta (seen on opus and fable alike) --
+# usage exceeding the declared window is proof the declared size is wrong
+if ($CurrentTokens -gt $ContextSize) {
+  $ContextSize = 1000000
+}
+
 $ContextPct = if ($ContextSize -gt 0) { Clamp-Pct ($CurrentTokens * 100 / $ContextSize) } else { 0 }
 $CurrentK = [int]($CurrentTokens / 1000)
 $ContextK = [int]($ContextSize / 1000)

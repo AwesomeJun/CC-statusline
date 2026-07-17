@@ -19,6 +19,11 @@ input=$(cat)
 MODEL=$(echo "$input" | jq -r '.model.display_name // "Unknown"')
 CURRENT_DIR=$(echo "$input" | jq -r '.workspace.current_dir // "."')
 CONTEXT_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size // 200000')
+
+# fable and opus 4.8 ship 1m context, but the harness can report 200k for them
+if echo "$MODEL" | grep -Eqi "fable|opus 4\.8|opus-4-8|claude-opus-4-8"; then
+    CONTEXT_SIZE=1000000
+fi
 CURRENT_USAGE=$(echo "$input" | jq -r '.context_window.current_usage // null')
 
 # Rate limits (official API - available for Pro/Max subscribers)
@@ -191,6 +196,12 @@ if [[ "$CURRENT_USAGE" != "null" && -n "$CURRENT_USAGE" ]]; then
     CACHE_CREATE=$(echo "$CURRENT_USAGE" | jq -r '.cache_creation_input_tokens // 0')
     CACHE_READ=$(echo "$CURRENT_USAGE" | jq -r '.cache_read_input_tokens // 0')
     CURRENT_TOKENS=$((INPUT_TOKENS + CACHE_CREATE + CACHE_READ))
+
+    # harness sometimes reports a stale 200k window even when the model is
+    # actually running the 1m context beta (seen on opus and fable alike) --
+    # usage exceeding the declared window is proof the declared size is wrong
+    [[ "$CURRENT_TOKENS" -gt "$CONTEXT_SIZE" ]] && CONTEXT_SIZE=1000000
+
     [[ "$CONTEXT_SIZE" -gt 0 ]] && CONTEXT_PERCENT=$((CURRENT_TOKENS * 100 / CONTEXT_SIZE))
 fi
 
